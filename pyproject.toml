@@ -1,0 +1,12 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "gitget"
+authors = [{ name = "Daniel Rocha", email = "daniel@rocha.io" }]
+dynamic = ["version", "description"]
+dependencies = ["typer >= 0.6.1, < 1", "rich >= 12.6.0, < 13"]
+
+[project.scripts]
+git-get = "gitget:app"
