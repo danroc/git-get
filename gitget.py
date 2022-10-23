@@ -15,6 +15,7 @@ app = typer.Typer()
 # Default configuration, which can be overridden by environment variables.
 config = {
     "GIT_GET_REPOS_DIR": "~/repos",
+    "GIT_GET_SSH_USERS": "danroc,LedgerHQ",
     "GIT_GET_DEFAULT_PREFIX": "https://github.com/",
 }
 
@@ -78,6 +79,11 @@ def main(repo_url: str):
     path = os.path.join(config["GIT_GET_REPOS_DIR"], host, user, repo)
     path = os.path.expanduser(path)
 
+    # Check if should force SSH
+    if user in config["GIT_GET_SSH_USERS"].split(","):
+        clone_url = f"git@{host}:{user}/{repo}.git"
+
+    print(f"Cloning repo: {clone_url}")
     out = subprocess.run(["git", "clone", clone_url, path])
     sys.exit(out.returncode)
 
