@@ -76,12 +76,12 @@ def main(repo_url: str):
         clone_url = config["GIT_GET_DEFAULT_PREFIX"] + clone_url
         host, user, repo = parse(clone_url)
 
+        # Check if use SSH instead
+        if user in config["GIT_GET_SSH_USERS"].split(","):
+            clone_url = f"git@{host}:{user}/{repo}.git"
+
     path = os.path.join(config["GIT_GET_REPOS_DIR"], host, user, repo)
     path = os.path.expanduser(path)
-
-    # Check if should force SSH
-    if user in config["GIT_GET_SSH_USERS"].split(","):
-        clone_url = f"git@{host}:{user}/{repo}.git"
 
     print(f"Cloning repo: {clone_url}")
     out = subprocess.run(["git", "clone", clone_url, path])
