@@ -6,7 +6,7 @@ build-backend = "flit_core.buildapi"
 name = "gitget"
 authors = [{ name = "Daniel Rocha", email = "daniel@rocha.io" }]
 dynamic = ["version", "description"]
-dependencies = ["typer >= 0.6.1, < 1", "rich >= 12.6.0, < 13"]
+dependencies = ["typer >= 0.6.1", "rich >= 12.6.0"]
 
 [project.scripts]
 git-get = "gitget:app"
