@@ -1,8 +1,9 @@
 """git-get script."""
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from dataclasses import dataclass
+import enum
 import os
 import subprocess
 import sys
@@ -26,6 +27,21 @@ class DelimiterNotFound(Exception):
     pass
 
 
+class InvalidURL(Exception):
+    pass
+
+
+class Schema(enum.Enum):
+    SSH = enum.auto()
+    HTTP = enum.auto()
+
+
+DELIMITERS = {
+    Schema.SSH: ["@", ":", "/", ".git"],
+    Schema.HTTP: ["://", "/", "/", ".git"],
+}
+
+
 @dataclass
 class Reader:
     s: str
@@ -41,25 +57,14 @@ class Reader:
         return self.s[k:j]
 
 
-class InvalidURL(Exception):
-    pass
-
-
-def _parse(url: str, delimiters: list[str]) -> tuple[str, str, str]:
-    reader = Reader(url)
-    try:
-        return tuple([reader.to(d) for d in delimiters][-3:])
-    except DelimiterNotFound:
-        raise InvalidURL
-
-
-def parse(url: str) -> tuple[str, str, str]:
-    try:
-        # Fist try to parse SSH
-        return _parse(url, ["@", ":", "/", ".git"])
-    except InvalidURL:
-        # Then other schemes
-        return _parse(url, ["://", "/", "/", ".git"])
+def parse(url: str) -> list[str]:
+    for delimiters in DELIMITERS.values():
+        try:
+            reader = Reader(url)
+            return [reader.to(d) for d in delimiters][-3:]
+        except DelimiterNotFound:
+            pass
+    raise InvalidURL
 
 
 @app.command()
@@ -76,14 +81,14 @@ def main(repo_url: str):
         clone_url = config["GIT_GET_DEFAULT_PREFIX"] + clone_url
         host, user, repo = parse(clone_url)
 
-        # Check if use SSH instead
+        # Check if should force SSH
         if user in config["GIT_GET_SSH_USERS"].split(","):
             clone_url = f"git@{host}:{user}/{repo}.git"
 
     path = os.path.join(config["GIT_GET_REPOS_DIR"], host, user, repo)
     path = os.path.expanduser(path)
 
-    print(f"Cloning repo: {clone_url}")
+    print(f"Cloning repo '{clone_url}'...")
     out = subprocess.run(["git", "clone", clone_url, path])
     sys.exit(out.returncode)
 
