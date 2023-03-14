@@ -16,7 +16,7 @@ app = typer.Typer()
 # Default configuration, which can be overridden by environment variables.
 config = {
     "GIT_GET_REPOS_DIR": "~/repos",
-    "GIT_GET_SSH_USERS": "danroc,LedgerHQ",
+    "GIT_GET_SSH_USERS": "danroc,MetaMask",
     "GIT_GET_DEFAULT_PREFIX": "https://github.com/",
 }
 
