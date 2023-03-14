@@ -1,14 +1,17 @@
 """git-get script."""
 
-__version__ = "0.1.1"
+from __future__ import annotations
 
-from dataclasses import dataclass
 import enum
 import os
+import re
 import subprocess
 import sys
+from dataclasses import dataclass
+
 import typer
 
+__version__ = "0.1.2"
 
 app = typer.Typer()
 
@@ -23,10 +26,6 @@ config = {
 config = {k: os.getenv(k, config[k]) for k in config}
 
 
-class DelimiterNotFound(Exception):
-    pass
-
-
 class InvalidURL(Exception):
     pass
 
@@ -36,34 +35,30 @@ class Schema(enum.Enum):
     HTTP = enum.auto()
 
 
-DELIMITERS = {
-    Schema.SSH: ["@", ":", "/", ".git"],
-    Schema.HTTP: ["://", "/", "/", ".git"],
+FORMATS = {
+    Schema.SSH: re.compile(r"^(.*?)@(?P<host>.*?):(?P<user>.*?)/(?P<repo>.*?)\.git$"),
+    Schema.HTTP: re.compile(
+        r"^https?://(?P<host>.*?)/(?P<user>.*?)/(?P<repo>.*?)\.git$"
+    ),
 }
 
 
-@dataclass
-class Reader:
-    s: str
-    i: int = 0
-
-    def to(self, delimiter: str) -> str:
-        j = self.s.find(delimiter, self.i)
-        if j == -1:
-            raise DelimiterNotFound
-
-        k = self.i
-        self.i = j + len(delimiter)
-        return self.s[k:j]
+@dataclass(frozen=True)
+class Repo:
+    host: str
+    user: str
+    name: str
 
 
-def parse(url: str) -> list[str]:
-    for delimiters in DELIMITERS.values():
-        try:
-            reader = Reader(url)
-            return [reader.to(d) for d in delimiters][-3:]
-        except DelimiterNotFound:
-            pass
+def parse(url: str) -> Repo:
+    for format in FORMATS.values():
+        m = format.match(url)
+        if m:
+            return Repo(
+                host=m.group("host"),
+                user=m.group("user"),
+                name=m.group("repo"),
+            )
     raise InvalidURL
 
 
@@ -75,17 +70,17 @@ def main(repo_url: str):
 
     try:
         # Try to parse the URL
-        host, user, repo = parse(clone_url)
+        repo = parse(clone_url)
     except InvalidURL:
         # Retry with the prefix
         clone_url = config["GIT_GET_DEFAULT_PREFIX"] + clone_url
-        host, user, repo = parse(clone_url)
+        repo = parse(clone_url)
 
         # Check if should force SSH
-        if user in config["GIT_GET_SSH_USERS"].split(","):
-            clone_url = f"git@{host}:{user}/{repo}.git"
+        if repo.user in config["GIT_GET_SSH_USERS"].split(","):
+            clone_url = f"git@{repo.host}:{repo.user}/{repo.name}.git"
 
-    path = os.path.join(config["GIT_GET_REPOS_DIR"], host, user, repo)
+    path = os.path.join(config["GIT_GET_REPOS_DIR"], repo.host, repo.user, repo.name)
     path = os.path.expanduser(path)
 
     print(f"Cloning repo '{clone_url}'...")
