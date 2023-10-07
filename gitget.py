@@ -5,7 +5,7 @@ from __future__ import annotations
 import enum
 import os
 import re
-import subprocess
+import subprocess  # nosec
 import sys
 from dataclasses import dataclass
 
@@ -19,7 +19,7 @@ app = typer.Typer()
 # Default configuration, which can be overridden by environment variables.
 config = {
     "GIT_GET_REPOS_DIR": "~/repos",
-    "GIT_GET_SSH_USERS": "danroc,MetaMask",
+    "GIT_GET_SSH_USERS": "danroc,metamask",
     "GIT_GET_DEFAULT_PREFIX": "https://github.com/",
 }
 
@@ -63,7 +63,7 @@ def parse(url: str) -> Repo:
 
 
 @app.command()
-def main(repo_url: str):
+def main(repo_url: str) -> None:
     clone_url = repo_url.strip()
     if not clone_url.endswith(".git"):
         clone_url += ".git"
@@ -77,14 +77,15 @@ def main(repo_url: str):
         repo = parse(clone_url)
 
         # Check if should force SSH
-        if repo.user in config["GIT_GET_SSH_USERS"].split(","):
+        use_ssh_on = config["GIT_GET_FORCE_SSH_ON"].lower().split(",")
+        if repo.user.lower() in use_ssh_on:
             clone_url = f"git@{repo.host}:{repo.user}/{repo.name}.git"
 
     path = os.path.join(config["GIT_GET_REPOS_DIR"], repo.host, repo.user, repo.name)
     path = os.path.expanduser(path)
 
     print(f"Cloning repo '{clone_url}'...")
-    out = subprocess.run(["git", "clone", clone_url, path])
+    out = subprocess.run(["git", "clone", clone_url, path])  # nosec
     sys.exit(out.returncode)
 
 
