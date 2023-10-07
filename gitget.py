@@ -16,11 +16,17 @@ __version__ = "0.1.2"
 app = typer.Typer()
 
 
+class Options(str, enum.Enum):
+    REPOS_DIR = "GIT_GET_REPOS_DIR"
+    SSH_USERS = "GIT_GET_SSH_USERS"
+    DEFAULT_PREFIX = "GIT_GET_DEFAULT_PREFIX"
+
+
 # Default configuration, which can be overridden by environment variables.
 config = {
-    "GIT_GET_REPOS_DIR": "~/repos",
-    "GIT_GET_SSH_USERS": "danroc,metamask",
-    "GIT_GET_DEFAULT_PREFIX": "https://github.com/",
+    Options.REPOS_DIR: "~/repos",
+    Options.SSH_USERS: "danroc,metamask",
+    Options.DEFAULT_PREFIX: "https://github.com/",
 }
 
 config = {k: os.getenv(k, config[k]) for k in config}
@@ -73,15 +79,15 @@ def main(repo_url: str) -> None:
         repo = parse(clone_url)
     except InvalidURL:
         # Retry with the prefix
-        clone_url = config["GIT_GET_DEFAULT_PREFIX"] + clone_url
+        clone_url = config[Options.DEFAULT_PREFIX] + clone_url
         repo = parse(clone_url)
 
         # Check if should force SSH
-        use_ssh_on = config["GIT_GET_FORCE_SSH_ON"].lower().split(",")
+        use_ssh_on = config[Options.SSH_USERS].lower().split(",")
         if repo.user.lower() in use_ssh_on:
             clone_url = f"git@{repo.host}:{repo.user}/{repo.name}.git"
 
-    path = os.path.join(config["GIT_GET_REPOS_DIR"], repo.host, repo.user, repo.name)
+    path = os.path.join(config[Options.REPOS_DIR], repo.host, repo.user, repo.name)
     path = os.path.expanduser(path)
 
     print(f"Cloning repo '{clone_url}'...")
