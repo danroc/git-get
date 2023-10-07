@@ -10,3 +10,26 @@ dependencies = ["typer >= 0.6.1", "rich >= 12.6.0"]
 
 [project.scripts]
 git-get = "gitget:app"
+
+[tool.black]
+preview = true
+
+[tool.isort]
+profile = "black"
+remove_redundant_aliases = true
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_any_unimported = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+show_column_numbers = true
+show_error_codes = true
+show_error_context = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_ignores = true
+
+[tool.bandit.assert_used]
+skips = ['*_test.py', '*/test_*.py']
