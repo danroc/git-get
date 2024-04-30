@@ -12,6 +12,9 @@ dependencies = ["typer >= 0.6.1", "rich >= 12.6.0"]
 [project.urls]
 homepage = "https://github.com/danroc/git-get"
 
+[tool.flit.module]
+name = "gitget"
+
 [project.scripts]
 git-get = "gitget:app"
 
