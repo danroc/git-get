@@ -1,4 +1,4 @@
-"""git-get script."""
+"""Automatically clone Git repos."""
 
 from __future__ import annotations
 
