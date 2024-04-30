@@ -5,7 +5,7 @@ from __future__ import annotations
 import enum
 import os
 import re
-import subprocess  # nosec
+import subprocess  # noqa: S404
 import sys
 from dataclasses import dataclass
 
@@ -42,9 +42,11 @@ class Schema(enum.Enum):
 
 
 FORMATS = {
-    Schema.SSH: re.compile(r"^(.*?)@(?P<host>.*?):(?P<user>.*?)/(?P<repo>.*?)\.git$"),
+    Schema.SSH: re.compile(
+        r"^(.*?)@(?P<host>.*?):(?P<user>.*?)/(?P<repo>.*?)\.git$",
+    ),
     Schema.HTTP: re.compile(
-        r"^https?://(?P<host>.*?)/(?P<user>.*?)/(?P<repo>.*?)\.git$"
+        r"^https?://(?P<host>.*?)(?P<port>:\d+)?/(?P<user>.*?)/(?P<repo>.*?)\.git$",
     ),
 }
 
@@ -91,7 +93,7 @@ def main(repo_url: str) -> None:
     path = os.path.expanduser(path)
 
     print(f"Cloning repo '{clone_url}'...")
-    out = subprocess.run(["git", "clone", clone_url, path])  # nosec
+    out = subprocess.run(["git", "clone", clone_url, path])  # noqa: S603,S607
     sys.exit(out.returncode)
 
 

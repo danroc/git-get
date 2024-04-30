@@ -11,12 +11,26 @@ dependencies = ["typer >= 0.6.1", "rich >= 12.6.0"]
 [project.scripts]
 git-get = "gitget:app"
 
-[tool.black]
+[tool.ruff]
 preview = true
 
-[tool.isort]
-profile = "black"
-remove_redundant_aliases = true
+[tool.ruff.lint]
+extend-select = [
+  "I",   # isort
+  "UP",  # pyupgrade
+  # "D",   # pydocstyle
+  "S",   # flake8-bandit
+  "B",   # flake8-bugbear
+  "COM", # flake8-commas
+  "C4",  # flake8-comprehensions
+  "ISC", # flake8-implicit-str-concat
+  "FIX", # flake8-fixme
+  "FA",  # flake8-future-annotations
+  "SIM", # flake8-simplify
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.mypy]
 check_untyped_defs = true
@@ -30,6 +44,3 @@ show_error_context = true
 warn_redundant_casts = true
 warn_return_any = true
 warn_unused_ignores = true
-
-[tool.bandit.assert_used]
-skips = ['*_test.py', '*/test_*.py']
