@@ -70,6 +70,11 @@ def parse(url: str) -> Repo:
     raise InvalidURL
 
 
+def should_use_ssh(repo: Repo) -> bool:
+    ssh_users = [u.strip().lower() for u in config[Options.SSH_USERS].split(",")]
+    return repo.user.lower() in ssh_users
+
+
 @app.command()
 def main(repo_url: str) -> None:
     clone_url = repo_url.strip()
@@ -84,12 +89,16 @@ def main(repo_url: str) -> None:
         clone_url = config[Options.DEFAULT_PREFIX] + clone_url
         repo = parse(clone_url)
 
-        # Check if should force SSH
-        use_ssh_on = config[Options.SSH_USERS].lower().split(",")
-        if repo.user.lower() in use_ssh_on:
-            clone_url = f"git@{repo.host}:{repo.user}/{repo.name}.git"
+    # Check if should force SSH
+    if should_use_ssh(repo):
+        clone_url = f"git@{repo.host}:{repo.user}/{repo.name}.git"
 
-    path = os.path.join(config[Options.REPOS_DIR], repo.host, repo.user, repo.name)
+    path = os.path.join(
+        config[Options.REPOS_DIR],
+        repo.host,
+        repo.user,
+        repo.name,
+    )
     path = os.path.expanduser(path)
 
     print(f"Cloning repo '{clone_url}'...")
