@@ -24,7 +24,7 @@ class Options(str, enum.Enum):
 
 # Default configuration, which can be overridden by environment variables.
 config = {
-    Options.REPOS_DIR: "~/repos",
+    Options.REPOS_DIR: "~/code",
     Options.SSH_USERS: "danroc,metamask",
     Options.DEFAULT_PREFIX: "https://github.com/",
 }
