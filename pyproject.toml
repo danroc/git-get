@@ -7,7 +7,15 @@ name = "git-get"
 authors = [{ name = "Daniel Rocha", email = "daniel@rocha.io" }]
 dynamic = ["version", "description"]
 requires-python = ">=3.10"
-dependencies = ["typer >= 0.6.1", "rich >= 12.6.0"]
+dependencies = [
+  "rich>=12.6.0",
+  "typer>=0.6.1",
+]
+
+[dependency-groups]
+dev = [
+    "flit>=3.12.0",
+]
 
 [project.urls]
 homepage = "https://github.com/danroc/git-get"
