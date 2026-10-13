@@ -6,7 +6,6 @@ import enum
 import os
 import re
 import subprocess  # noqa: S404
-import sys
 from dataclasses import dataclass
 
 import typer
@@ -23,13 +22,13 @@ class Options(str, enum.Enum):
 
 
 # Default configuration, which can be overridden by environment variables.
-config = {
+DEFAULTS = {
     Options.REPOS_DIR: "~/code",
     Options.SSH_USERS: "danroc,metamask",
     Options.DEFAULT_PREFIX: "https://github.com/",
 }
 
-config = {k: os.getenv(k, config[k]) for k in config}
+config = {option: os.getenv(option, default) for option, default in DEFAULTS.items()}
 
 
 class InvalidURL(Exception):
@@ -59,8 +58,8 @@ class Repo:
 
 
 def parse(url: str) -> Repo:
-    for format in FORMATS.values():
-        m = format.match(url)
+    for pattern in FORMATS.values():
+        m = pattern.match(url)
         if m:
             return Repo(
                 host=m.group("host"),
@@ -103,7 +102,7 @@ def main(repo_url: str) -> None:
 
     print(f"Cloning repo '{clone_url}'...")
     out = subprocess.run(["git", "clone", clone_url, path])  # noqa: S603,S607
-    sys.exit(out.returncode)
+    raise typer.Exit(code=out.returncode)
 
 
 if __name__ == "__main__":
