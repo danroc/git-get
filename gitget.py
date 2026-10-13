@@ -101,7 +101,7 @@ def main(repo_url: str) -> None:
     path = os.path.expanduser(path)
 
     print(f"Cloning repo '{clone_url}'...")
-    out = subprocess.run(["git", "clone", clone_url, path])  # noqa: S603,S607
+    out = subprocess.run(["git", "clone", clone_url, path], check=False)  # noqa: S603,S607
     raise typer.Exit(code=out.returncode)
 
 
